@@ -1,2 +1,3 @@
 # marlo-media
-Temporary transfer space. Files are removed after they are copied.
+Temporary transfer space (`transfer/`: files are removed after they are copied to Drive)
+and the Marble Street series kit (`marble-street/`).
