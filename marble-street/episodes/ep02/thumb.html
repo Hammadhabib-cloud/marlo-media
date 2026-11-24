@@ -1,0 +1,43 @@
+<!doctype html><meta charset="utf-8">
+<style>@font-face{font-family:"Archivo Black";src:url(/node_modules/@fontsource/archivo-black/files/archivo-black-latin-400-normal.woff2)}body{margin:0;background:#000}</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { C, M, renderer, world, box, place, label, rand } from './world.js';
+import { marlo, person } from './marlo.js';
+import { sock, PAT, washer, sockCloud, setS, townsperson, marble } from './sets.js';
+await document.fonts.load('60px "Archivo Black"');
+const MS = () => marlo({ sockL: PAT.stripe(), sockR: PAT.dots() });
+function ep1(v) {
+  const w = world(0x1f6f78, { floor: 0x2b858f, env: .85, sun: 2.8, sh: 14 }); const off = v ? 0 : 2.7;
+  place(box(40, 22, .4, 0x1f6f78, .02, .9), 0, 11, -4, w.scene);
+  const wa = washer(); place(wa, v ? 2.25 : off + 3.05, 0, -2.4, w.scene); wa.scale.setScalar(1.35);
+  const m = MS(); place(m, off - (v ? .35 : .3), 0, 0, w.scene); m.rotation.y = v ? .05 : -.3;
+  m.pose({ mood: 'shock', armL: [1.5, .62], armR: [.5, .35], head: [v ? .05 : -.3, -.03, .04], look: [v ? 0 : -.7, .1] });
+  const s = sock('stripe', v ? .55 : .72); s.rotation.set(.1, .2, .3); place(s, v ? -1.0 : off - 2.1, v ? 1.75 : 2.25, 1.5, w.scene);
+  const n = 90, sc = sockCloud(n); w.scene.add(sc); const r = rand(11); for (let i = 0; i < n; i++) setS(sc, i, (r() - .5) * 15, r() * .7 + .2, 1.5 + r() * 2.5, .75 + r() * .3, r() * 6, r() * 6, r() * 6); sc.instanceMatrix.needsUpdate = true;
+  return { w, top: ['1 SOCK =', '$1,000,000'], cam: v ? [[0, 3.1, 11.5], [0, 3.55, 0]] : [[0, 3.05, 8.8], [0, 3.05, 0]] };
+}
+function ep2(v) {
+  const w = world(0x27406e, { floor: 0x33548a, env: .85, sun: 2.8, sh: 20, far: 60 }); const off = v ? 0 : 2.7;
+  place(box(60, 24, .4, 0x27406e, .02, .9), 0, 12, -16, w.scene);
+  for (let i = 0; i < 26; i++) { const p = townsperson(i); place(p, (v ? -9 : -13) + i * 1.25, 0, -6.5 - (i % 2) * 1.4, w.scene); p.rotation.y = -.25 + (i % 3) * .25; p.pose({ mood: i % 2 ? 'stare' : 'sad', armL: [0, .1], armR: [0, .1], head: [(i % 3 - 1) * .3, .05, 0] }); }
+  const m = MS(); place(m, off - .25, 0, 0, w.scene); m.rotation.y = v ? 0 : -.3;
+  m.pose({ mood: 'shock', armL: [1.5, .62], armR: [.5, .35], head: [v ? 0 : -.3, -.03, .04], look: [v ? 0 : -.7, .1] });
+  const b = label('$20', v ? 1.5 : 1.75, v ? .75 : .88, { bg: '#8fdcae', fg: '#14513a', rad: 26, border: '#3f9a6c' }); place(b, v ? -.95 : off - 2.2, v ? 1.95 : 2.5, 1.5, w.scene); b.rotation.z = .16;
+  return { w, top: ['3 HOURS =', '$1,000,000'], cam: v ? [[0, 3.1, 11.5], [0, 3.55, 0]] : [[0, 3.05, 8.8], [0, 3.05, 0]] };
+}
+window.thumb = (ep, v) => {
+  const Wd = v ? 1080 : 1920, Hg = v ? 1920 : 1080; renderer.setPixelRatio(1); renderer.setSize(Wd, Hg, false);
+  const o = (ep === 1 ? ep1 : ep2)(v); const c = o.w.cam; c.aspect = Wd / Hg; c.position.set(...o.cam[0]); c.lookAt(...o.cam[1]); c.updateProjectionMatrix();
+  renderer.render(o.w.scene, c);
+  const cv = document.createElement('canvas'); cv.width = Wd; cv.height = Hg; const g = cv.getContext('2d'); g.drawImage(renderer.domElement, 0, 0);
+  g.textBaseline = 'alphabetic'; g.lineJoin = 'round';
+  const fit = (t, maxw, fs) => { g.font = `${fs}px "Archivo Black"`; while (g.measureText(t).width > maxw) { fs *= .97; g.font = `${fs}px "Archivo Black"`; } return fs; };
+  const maxw = v ? 980 : 1080, x0 = v ? 540 : 64; g.textAlign = v ? 'center' : 'left';
+  let y = v ? 300 : 245;
+  o.top.forEach((t, i) => { const fs = fit(t, maxw, v ? (i ? 190 : 170) : (i ? 200 : 180)); g.font = `${fs}px "Archivo Black"`; g.strokeStyle = '#0b1224'; g.lineWidth = fs * .2; g.strokeText(t, x0, y); g.fillStyle = i ? '#f5b700' : '#ffffff'; g.fillText(t, x0, y); y += fs * 1.16; });
+  return cv.toDataURL('image/png').split(',')[1];
+};
+window.ready = true;
+</script>
