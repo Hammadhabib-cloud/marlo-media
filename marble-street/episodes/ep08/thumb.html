@@ -1,0 +1,114 @@
+<!doctype html><meta charset="utf-8">
+<style>@font-face{font-family:"Archivo Black";src:url(/node_modules/@fontsource/archivo-black/files/archivo-black-latin-400-normal.woff2)}body{margin:0;background:#000}</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { C, M, renderer, world, box, place, label, rand } from './world.js';
+import { marlo, person } from './marlo.js';
+import { sock, PAT, washer, sockCloud, setS, townsperson, street } from './sets.js';
+import { parcel, note, key } from './scenes.js';
+await document.fonts.load('60px "Archivo Black"');
+const MS = () => marlo({ sockL: PAT.stripe(), sockR: PAT.dots() });
+const KINDS = ['fern', 'monstera', 'cactus'], POTS = [0xc8643b, 0x5aa9e6, 0xf2a9a0, 0xf7e2a0, 0x7b5fc7, 0xfbf7ee];
+const SHOCK = (m, v, look = -.7) => m.pose({ mood: 'shock', armL: [1.45, .62], armR: [.45, .3], head: [v ? .05 : -.28, -.04, .05], look: [v ? -.2 : look, .1] });
+
+// Each episode: background world, the hero (Marlo + one object), the line of text.
+const EP = {
+  1: v => {
+    const w = world(0x1f6f78, { floor: 0x2b858f, env: .85, sun: 2.8, sh: 14 }); place(box(40, 22, .4, 0x2a8a95, .02, .9), 0, 11, -5, w.scene);
+    const wa = washer(); place(wa, v ? 2.6 : 3.2, 0, -3.2, w.scene); wa.scale.setScalar(1.35);
+    const n = 110, sc = sockCloud(n); w.scene.add(sc); const r = rand(11); for (let i = 0; i < n; i++) setS(sc, i, (r() - .5) * 18, r() * .8 + .2, -1 + r() * 4.2, .75 + r() * .35, r() * 6, r() * 6, r() * 6); sc.instanceMatrix.needsUpdate = true;
+    const m = MS(); const hero = sock('stripe', 1); hero.rotation.set(.15, .3, .3); return { w, m, hero, top: ['1 SOCK =', '$1,000,000'], ep: 'EP 1', glow: '#7fe0ff' };
+  },
+  2: v => {
+    const w = world(0x27406e, { floor: 0x33548a, env: .85, sun: 2.8, sh: 20, far: 60 }); place(box(60, 24, .4, 0x2d4a7e, .02, .9), 0, 12, -16, w.scene);
+    for (let i = 0; i < 30; i++) { const p = townsperson(i); place(p, -16 + i * 1.15, 0, -5.5 - (i % 2) * 1.4, w.scene); p.rotation.y = -.25 + (i % 3) * .25; p.pose({ mood: i % 2 ? 'stare' : 'sad', armL: [0, .1], armR: [0, .1], head: [(i % 3 - 1) * .3, .05, 0] }); }
+    const m = MS(); const hero = label('$20', 1.9, .95, { bg: '#8fdcae', fg: '#14513a', rad: 26, border: '#3f9a6c' }); hero.rotation.z = .16; return { w, m, hero, top: ['3 HOURS =', '$1,000,000'], ep: 'EP 2', glow: '#ffd36b' };
+  },
+  3: v => {
+    const w = street({ signs: ['', '', '', 'PLANT HOTEL', '', '', ''], sh: 26 }); w.houses[3].userData.sign.position.y = 4.8;
+    for (let i = 0; i < 26; i++) { const p = plant(KINDS[i % 3], .62, POTS[i % 6]); place(p, -8 + (i % 13) * 1.3, .1, -3.1 + Math.floor(i / 13) * 1.2, w.scene); }
+    const m = MS(); const hero = new THREE.Group(); const f = plant('fern', .9); f.userData.set(.03); hero.add(f);
+    const rip = new THREE.Group(); place(rip, .15, .62 * .9, .1, hero); place(box(.06, .9, .06, 0x8a5a35, .01), 0, .45, 0, rip); const rl = label('RIP', .8, .44, { bg: '#e6dbc1', fg: '#14213d', rad: 12 }); place(rl, 0, .92, .05, rip);
+    return { w, m, hero, top: ['1 DEAD PLANT =', '$1,000,000'], ep: 'EP 3', glow: '#a6f08f' };
+  },
+  7: v => {
+    const w = street({ signs: ['', '', '', 'PORCH 7', '', '', ''], sh: 26 }); w.houses[3].userData.sign.position.y = 4.8;
+    for (let i = 0; i < 18; i++) { const p = parcel(.7); place(p, -7 + (i % 9) * 1.6, Math.floor(i / 9) * .58, -2.9 + (i % 2) * .3, w.scene); p.rotation.y = (i % 3 - 1) * .2; }
+    const m = MS(); const hero = new THREE.Group(); const n = label('SORRY WE\nMISSED YOU', 1.5, 1.5, { bg: '#ffd23f', fg: '#14213d', rad: 8 }); n.rotation.set(-.05, .2, .12); hero.add(n);
+    return { w, m, hero, top: ['1 NOTE =', '$1,000,000'], ep: 'EP 7', glow: '#ffe56b' };
+  },
+  8: v => {
+    const w = street({ signs: ['', '', '', 'KEY KEEPER', '', '', ''], sh: 26, bg: 0x1d2b4f, sun: 1.2, env: .55 }); w.houses[3].userData.sign.position.y = 4.8;
+    const L = new THREE.PointLight(0xffc47a, 30, 16); place(L, 1, 5, 1.5, w.scene);
+    const m = MS(); const hero = new THREE.Group(); const k = key(1.05, C.gold, 0xe4572e); k.rotation.set(.1, .2, .75); k.position.set(.35, -.1, 0); hero.add(k);
+    return { w, m, hero, top: ['1 SPARE KEY =', '$1,000,000'], ep: 'EP 8', glow: '#ffe56b' };
+  },
+};
+
+const cut = (Wd, Hg) => { const c = document.createElement('canvas'); c.width = Wd; c.height = Hg; return c; };
+window.thumb = (ep, v) => {
+  const Wd = v ? 1080 : 1920, Hg = v ? 1920 : 1080; renderer.setPixelRatio(1); renderer.setSize(Wd, Hg, false);
+  const o = EP[ep](v); const { w, m, hero } = o; w.scene.add(m); w.scene.add(hero);
+  // hero pose and placement
+  const mx = v ? .55 : 2.25; place(m, mx, 0, 0, w.scene); m.rotation.y = v ? -.08 : -.32; SHOCK(m, v);
+  if (ep === 3 || ep === 5) place(hero, v ? -.85 : mx - 2.35, v ? 1.55 : 1.75, 1.4, w.scene); else place(hero, v ? -.75 : mx - 2.3, v ? 2.2 : 2.45, 1.5, w.scene);
+  if (ep === 1) hero.scale.setScalar(v ? .62 : .78);
+  const cam = w.cam; cam.aspect = Wd / Hg; cam.fov = v ? 36 : 30; cam.position.set(...(v ? [0, 3.0, 10.6] : [-.2, 3.05, 8.0])); cam.lookAt(...(v ? [0, 3.35, 0] : [-.2, 2.8, 0])); cam.updateProjectionMatrix();
+  // pass 1: background, without the hero, blurred
+  m.visible = hero.visible = false; renderer.render(w.scene, cam);
+  const out = cut(Wd, Hg), g = out.getContext('2d'); g.filter = 'blur(7px) saturate(1.15)'; g.drawImage(renderer.domElement, -Wd * .02, -Hg * .02, Wd * 1.04, Hg * 1.04); g.filter = 'none';
+  // pass 2: hero colour on black, pass 3: hero mask
+  m.visible = hero.visible = true; const keep = new Set(); [m, hero].forEach(x => x.traverse(y => keep.add(y)));
+  const hid = []; w.scene.children.forEach(c => { if (!c.isLight && c !== m && c !== hero && c.visible) { c.visible = false; hid.push(c); } });
+  const bg = w.scene.background, fog = w.scene.fog; w.scene.background = new THREE.Color(0); w.scene.fog = null; renderer.render(w.scene, cam);
+  const col = cut(Wd, Hg); col.getContext('2d').drawImage(renderer.domElement, 0, 0);
+  w.scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff }); const tm = renderer.toneMapping; renderer.toneMapping = THREE.NoToneMapping; renderer.render(w.scene, cam); renderer.toneMapping = tm; w.scene.overrideMaterial = null;
+  const msk = cut(Wd, Hg); msk.getContext('2d').drawImage(renderer.domElement, 0, 0);
+  const cd = col.getContext('2d').getImageData(0, 0, Wd, Hg), md = msk.getContext('2d').getImageData(0, 0, Wd, Hg).data;
+  for (let i = 0; i < md.length; i += 4) { const a = md[i]; cd.data[i + 3] = a; if (a > 0 && a < 255) { const k = 255 / a; cd.data[i] = Math.min(255, cd.data[i] * k); cd.data[i + 1] = Math.min(255, cd.data[i + 1] * k); cd.data[i + 2] = Math.min(255, cd.data[i + 2] * k); } }
+  const fg = cut(Wd, Hg); fg.getContext('2d').putImageData(cd, 0, 0);
+  hid.forEach(c => c.visible = true); w.scene.background = bg; w.scene.fog = fog;
+  // where things land on screen
+  const sp = (obj, dy = 0) => { const p = new THREE.Vector3(); obj.getWorldPosition(p); p.y += dy; p.project(cam); return [(p.x + 1) / 2 * Wd, (1 - p.y) / 2 * Hg]; };
+  const head = sp(m, 3.3), heroP = sp(hero, (ep === 3 || ep === 5) ? .6 : 0);
+  // grade: darken edges, light behind Marlo
+  g.fillStyle = 'rgba(6,10,24,.28)'; g.fillRect(0, 0, Wd, Hg);
+  const rg = g.createRadialGradient(head[0], head[1], 30, head[0], head[1], Math.max(Wd, Hg) * .55); rg.addColorStop(0, o.glow + 'cc'); rg.addColorStop(.35, o.glow + '44'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+  g.globalCompositeOperation = 'screen'; g.fillStyle = rg; g.fillRect(0, 0, Wd, Hg); g.globalCompositeOperation = 'source-over';
+  const vg = g.createRadialGradient(Wd / 2, Hg / 2, Math.min(Wd, Hg) * .35, Wd / 2, Hg / 2, Math.max(Wd, Hg) * .75); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(4,6,18,.6)'); g.fillStyle = vg; g.fillRect(0, 0, Wd, Hg);
+  // hero cutout: drop shadow, thick white outline, then the hero
+  const sil = cut(Wd, Hg), sg = sil.getContext('2d'); sg.drawImage(fg, 0, 0); sg.globalCompositeOperation = 'source-in'; sg.fillStyle = '#ffffff'; sg.fillRect(0, 0, Wd, Hg);
+  const dark = cut(Wd, Hg), dg = dark.getContext('2d'); dg.drawImage(fg, 0, 0); dg.globalCompositeOperation = 'source-in'; dg.fillStyle = 'rgba(0,0,0,.55)'; dg.fillRect(0, 0, Wd, Hg);
+  g.filter = 'blur(18px)'; g.drawImage(dark, 14, 22); g.filter = 'none';
+  const R = v ? 11 : 12; for (let a = 0; a < 24; a++) g.drawImage(sil, Math.cos(a / 24 * 6.283) * R, Math.sin(a / 24 * 6.283) * R);
+  g.drawImage(fg, 0, 0);
+  // text block
+  g.lineJoin = 'round'; g.textBaseline = 'alphabetic';
+  const fit = (t, maxw, fs) => { g.font = `${fs}px "Archivo Black"`; while (g.measureText(t).width > maxw) { fs *= .97; g.font = `${fs}px "Archivo Black"`; } return fs; };
+  const maxw = v ? 960 : 1060, x0 = v ? 540 : 70; g.textAlign = v ? 'center' : 'left';
+  const sizes = o.top.map((t, i) => fit(t, maxw, v ? (i ? 200 : 150) : (i ? 205 : 150)));
+  let y = (v ? 120 : 70) + sizes[0] * .78; const boxes = [];
+  o.top.forEach((t, i) => {
+    const fs = sizes[i]; g.font = `${fs}px "Archivo Black"`; const tw = g.measureText(t).width;
+    g.save(); g.translate(x0, y); g.rotate(-.025);
+    g.shadowColor = 'rgba(0,0,0,.55)'; g.shadowBlur = 0; g.shadowOffsetX = 0; g.shadowOffsetY = fs * .07; g.strokeStyle = '#0b1224'; g.lineWidth = fs * .26; g.strokeText(t, 0, 0); g.shadowColor = 'transparent';
+    if (i) { const gr = g.createLinearGradient(0, -fs * .8, 0, 0); gr.addColorStop(0, '#fff07a'); gr.addColorStop(.5, '#ffc400'); gr.addColorStop(1, '#f08a00'); g.fillStyle = gr; } else g.fillStyle = '#ffffff';
+    g.fillText(t, 0, 0); g.restore(); boxes.push([v ? x0 - tw / 2 : x0, y - fs * .8, tw, fs]); if (i === 0) y += sizes[1] * .98;
+  });
+  // red arrow from the money line to the object
+  const b = boxes[1]; const ax = v ? heroP[0] + 40 : b[0] + b[2] * .32, ay = b[1] + b[3] + 6;
+  const tx = heroP[0] + (v ? 30 : -10), ty = heroP[1] - (v ? 130 : 105); if (ty > ay + 40) {
+    g.save(); g.lineCap = 'round'; const cx = (ax + tx) / 2 + (v ? -140 : -90), cy = (ay + ty) / 2;
+    const draw = (col, lw) => { g.strokeStyle = col; g.lineWidth = lw; g.beginPath(); g.moveTo(ax, ay); g.quadraticCurveTo(cx, cy, tx, ty); g.stroke(); };
+    draw('#0b1224', v ? 30 : 32); draw('#ff3b30', v ? 18 : 20);
+    const an = Math.atan2(ty - cy, tx - cx), hl = v ? 58 : 62; g.translate(tx, ty); g.rotate(an); g.beginPath(); g.moveTo(hl * .55, 0); g.lineTo(-hl * .6, -hl * .6); g.lineTo(-hl * .6, hl * .6); g.closePath(); g.fillStyle = '#ff3b30'; g.lineWidth = 10; g.strokeStyle = '#0b1224'; g.stroke(); g.fill(); g.restore();
+  }
+  // series badge
+  g.save(); const bx = v ? 54 : Wd - 300, by = v ? Hg - 170 : 46; g.fillStyle = '#0b1224'; g.beginPath(); g.roundRect(bx, by, 250, 92, 46); g.fill(); g.lineWidth = 5; g.strokeStyle = '#f5b700'; g.stroke();
+  const gr = g.createRadialGradient(bx + 42, by + 38, 4, bx + 48, by + 46, 30); gr.addColorStop(0, '#fff3b0'); gr.addColorStop(.5, '#f5b700'); gr.addColorStop(1, '#a87400'); g.fillStyle = gr; g.beginPath(); g.arc(bx + 48, by + 46, 26, 0, 7); g.fill();
+  g.fillStyle = '#ffffff'; g.font = '40px "Archivo Black"'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(o.ep, bx + 92, by + 49); g.restore();
+  return out.toDataURL('image/png').split(',')[1];
+};
+window.ready = true;
+</script>
